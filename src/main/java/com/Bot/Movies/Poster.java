@@ -21,24 +21,22 @@ public class Poster {
     public String getInfoMovie() {
         Element elementBlock = document.getElementById("schedule-table");
         String result = "";
-        Elements element = elementBlock.child(0).getElementsByClass("a-event-list js-film-list-wrapper");
-        for (int i = 0; i < element.size(); i++) {
-            Element tmp = element.get(i).child(i);
-            for (int j = 0; j < tmp.children().size(); j++) {
-                String name = tmp.child(j).getElementsByClass("item-header").text();
-                String time = tmp.child(j).getElementsByClass("b-shedule__list js-shedule-list").text();
+        final int FIRST_BLOCK = 0;
+        Element element = elementBlock.child(FIRST_BLOCK).getElementsByClass("a-event-list js-film-list-wrapper").first().child(FIRST_BLOCK);
+        for (int j = 0; j < element.children().size(); j++) {
+            String name = element.child(j).getElementsByClass("item-header").text();
+            String time = element.child(j).getElementsByClass("b-shedule__list js-shedule-list").text();
 
-                time = time.replaceAll("Сеанс уже прошел", " ");
-                time = time.replaceAll("Купить билет: от \\d+ руб\\.", "");
-                time = time.replaceAll("до \\d+ руб\\.", "");
+            time = time.replaceAll("Сеанс уже прошел", " ");
+            time = time.replaceAll("Купить билет.++", "");
+            time = time.replaceAll("Купить билет", "");
 
-                result += "Кинотеатр: " + name + ", Время: " + time +  "\n";
-            }
+            result += "Кинотеатр: " + name + ", Время: " + time + "\n";
         }
         return result;
     }
 
-    public String getTitle(){
+    public String getTitle() {
         return document.title();
     }
 }

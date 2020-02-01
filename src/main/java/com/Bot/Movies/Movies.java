@@ -36,6 +36,9 @@ public class Movies {
                 url = listUrl.get(i);
             }
         }
+        if (url.equals("")){
+            return "Ошибка ввода";
+        }
         poster = new Poster(url);
         String result = poster.getTitle() + "\n";
         result = result.replaceAll("трейлер, отзывы и расписание на AFISHA.TUT.BY", "").toUpperCase();
@@ -46,10 +49,10 @@ public class Movies {
     public List<String> getEvent() {
         List<String> listInfoMovies = new ArrayList<>();
         Element elementEventsBlock = document.getElementById("events-block");
-
+        final int IGNORE_BLOCK = 1;
         for (int i = 0; i < elementEventsBlock.children().size(); i++) {
             Element element = elementEventsBlock.child(i);
-            if (i == 1) {
+            if (i == IGNORE_BLOCK) {
                 continue;
             }
             for (int j = 0; j < element.children().size(); j++) {
