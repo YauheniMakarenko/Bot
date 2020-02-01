@@ -25,7 +25,7 @@ public class Music {
 
     public List<String> getMusic() {
         Elements elements = document.getElementsByClass("musicset-track-list__items");
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<>();
 
         for (int i = 0; i < elements.first().children().size(); i++) {
             list.add(elements.first().child(i).text());
@@ -35,7 +35,7 @@ public class Music {
 
     public List<String> getJSONAudio() {
         Elements elements = document.getElementsByClass("musicset-track-list__items");
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<>();
         for (int i = 0; i < elements.first().children().size(); i++) {
 
             Elements elementsUrl = elements.first().child(i).getElementsByClass("musicset-track__download-link track-geo__button");

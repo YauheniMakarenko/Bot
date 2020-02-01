@@ -33,11 +33,13 @@ public class Bot extends TelegramLongPollingBot {
             switch (message.getText()) {
                 case "/Weather":
                     sendMsg(chatId, "Введите город!");
+
                     try {
                         sendMsg(chatId, Weather.getWeather(message.getText(), model));
                     } catch (IOException e) {
                         sendMsg(chatId, "Город не найден!");
                     }
+
                     break;
                 case "/Music":
                     try {
@@ -52,19 +54,22 @@ public class Bot extends TelegramLongPollingBot {
 
                     // sendMsg(chatId, getMovie(message));       //message цифра из списка
                     break;
-                default:
+                case "/Start":
                     sendMsg(chatId, "Список команд:\n /Weather\n /Music\n /Movies");
+                    break;
+                default:
 
 
-                    try{
+                    /*try{
                         sendMsg(chatId, Weather.getWeather(message.getText(), model));
                     } catch (IOException e) {
                         sendMsg(chatId, "Город не найден!");
-                    }
+                    }*/
 
 
                     sendMsg(chatId, movies.getMovie(message));
             }
+
         } else if (update.hasCallbackQuery()) {
             String text = update.getCallbackQuery().getData();
             long chat_id = update.getCallbackQuery().getMessage().getChatId();
@@ -128,7 +133,7 @@ public class Bot extends TelegramLongPollingBot {
         List<String> listMusic = music.getMusic();
         List<String> listJsonMusic = music.getJSONAudio();
 
-        List rowList = new ArrayList<>();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
         if (!text.equals("Следующие") && !text.equals("Предыдущие")) {
             for (int i = 0; i < 10; i++) {
