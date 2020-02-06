@@ -3,7 +3,6 @@ package com.Bot.Movies;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.telegram.telegrambots.api.objects.Message;
 
 import java.io.IOException;
@@ -12,8 +11,8 @@ import java.util.List;
 
 public class Movies {
 
-    private Document document;
-    private List<String> listUrl = new ArrayList<>();
+    private  Document document;
+    private static List<String> listUrl = new ArrayList<>();
     private Poster poster;
 
     public Movies() {

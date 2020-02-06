@@ -1,108 +1,127 @@
 package com.Bot;
 
+import com.Bot.Commands.RemoteControlAdmin;
 import com.Bot.Movies.Movies;
 import com.Bot.Music.Music;
 import com.Bot.Weather.Model;
 import com.Bot.Weather.Weather;
 import org.telegram.telegrambots.api.methods.send.SendAudio;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
-public class Bot extends TelegramLongPollingBot {
+public class Bot extends TelegramLongPollingBot implements IBot {
+
+    private final String botUserName = "@DATT_Bot";
+    private final String token = "899355466:AAHzvUzhXMIdb87WmVkLy1rJioFhmaBS_Ws";
 
     private Model model = new Model();
     private Movies movies = new Movies();
     private Music music = new Music();
-    private int index = 10;
+    private int index;
+    private static Bot instance;
+
+    private Bot() {
+    }
+
+    public static Bot getBot() {
+        if (instance == null) {
+            instance = new Bot();
+        }
+        return instance;
+    }
 
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            Message message = update.getMessage();
-            long chatId = update.getMessage().getChatId();
-            switch (message.getText()) {
-                case "/Weather":
-                    sendMsg(chatId, "Введите город!");
-
-                    try {
-                        sendMsg(chatId, Weather.getWeather(message.getText(), model));
-                    } catch (IOException e) {
-                        sendMsg(chatId, "Город не найден!");
-                    }
-
-                    break;
-                case "/Music":
-                    try {
-                        execute(sendInlineKeyBoardMessage(chatId, "Популярные треки на zaycev.net \n" +
-                                "Выберите трек который хотите прослушать"));
-                    } catch (TelegramApiException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "/Movies":
-                    sendMsg(chatId, getInfoMovies());
-
-                    // sendMsg(chatId, getMovie(message));       //message цифра из списка
-                    break;
-                case "/Start":
-                    sendMsg(chatId, "Список команд:\n /Weather\n /Music\n /Movies");
-                    break;
-                default:
-
-
-                    /*try{
-                        sendMsg(chatId, Weather.getWeather(message.getText(), model));
-                    } catch (IOException e) {
-                        sendMsg(chatId, "Город не найден!");
-                    }*/
-
-
-                    sendMsg(chatId, movies.getMovie(message));
-            }
-
+            workWithMessages(update);
         } else if (update.hasCallbackQuery()) {
-            String text = update.getCallbackQuery().getData();
-            long chat_id = update.getCallbackQuery().getMessage().getChatId();
-            if (text.equals("Следующие")) {
+            workWithCallbackQuery(update);
+        }
+    }
+
+    public void workWithMessages(Update update){
+        Message message = update.getMessage();
+        long chatId = update.getMessage().getChatId();
+
+        if (message.getText().equals("Weather")
+                || message.getText().equals("Music")
+                || message.getText().equals("/start")
+                || message.getText().equals("Movies")) {
+
+            RemoteControlAdmin.findCommand(message.getText()).action(message);
+        } else {
+            if (finder(message.getText(), "\\d+")) {
+
+                sendMsg(chatId, movies.getMovie(message));
+
+            } else if (finder(message.getText(), "[A-zА-я]+")) {
                 try {
-                    execute(sendInlineKeyBoardMessage(chat_id, "Следующие"));
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
+                    sendMsg(chatId, Weather.getWeather(message.getText(), model));
+                } catch (IOException e) {
+                    sendMsg(chatId, "Город не найден!");
                 }
-            } else if (text.equals("Предыдущие")) {
-                try {
-                    execute(sendInlineKeyBoardMessage(chat_id, "Предыдущие"));
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                sendAudioMessage(chat_id, text);
             }
         }
     }
 
+    public void workWithCallbackQuery(Update update){
+        String text = update.getCallbackQuery().getData();
+        long chat_id = update.getCallbackQuery().getMessage().getChatId();
+        if (text.equals("\u27A1")) {
+            try {
+                execute(new EditMessageReplyMarkup()
+                        .setMessageId(update.getCallbackQuery().getMessage().getMessageId())
+                        .setChatId(chat_id)
+                        .setReplyMarkup(sendInlineKeyBoardMessage(text)));
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        } else if (text.equals("\u2B05")) {
+            try {
+                execute(new EditMessageReplyMarkup()
+                        .setMessageId(update.getCallbackQuery().getMessage().getMessageId())
+                        .setChatId(chat_id)
+                        .setReplyMarkup(sendInlineKeyBoardMessage(text)));
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        } else {
+            sendAudioMessage(chat_id, text);
+        }
+    }
+
+    @Override
     public synchronized void sendMsg(long chatId, String text) {
         SendMessage sendMessage = new SendMessage()
                 .enableMarkdown(true)
                 .setChatId(chatId)
                 .setText(text);
         try {
+            setButtons(sendMessage);
             execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
+    @Override
     public synchronized void sendAudioMessage(long chatId, String givenStringJson) {
         SendAudio sendAudio = new SendAudio()
                 .setChatId(chatId)
@@ -114,6 +133,14 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    private boolean finder(String element, String regex) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(element);
+        matcher.find();
+        return matcher.matches();
+
+    }
+
     public String getInfoMovies() {
         String info = "";
         int number = 0;
@@ -122,67 +149,73 @@ public class Bot extends TelegramLongPollingBot {
             info += (number + ". " + listString.get(i) + "\n");
             number++;
         }
-        info += "Вы номер фильма который вам понравился";
+        info += "Выберите номер фильма который вам понравился";
 
         return info;
     }
 
-    public synchronized SendMessage sendInlineKeyBoardMessage(long chatId, String text) {
+    public synchronized InlineKeyboardMarkup sendInlineKeyBoardMessage(String text) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
         List<String> listMusic = music.getMusic();
         List<String> listJsonMusic = music.getJSONAudio();
 
-        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-
-        if (!text.equals("Следующие") && !text.equals("Предыдущие")) {
+        if (!text.equals("\u27A1") && !text.equals("\u2B05")) {
             for (int i = 0; i < 10; i++) {
-                List<InlineKeyboardButton> list = new ArrayList<>();
-                list.add(new InlineKeyboardButton().setText(listMusic.get(i)).setCallbackData(listJsonMusic.get(i)));
-                rowList.add(list);
-            }
-        } else if (text.equals("Следующие")) {
-            for (int i = index; i < index + 10; i++) {
-                List<InlineKeyboardButton> list = new ArrayList<>();
-                list.add(new InlineKeyboardButton().setText(listMusic.get(i)).setCallbackData(listJsonMusic.get(i)));
-                rowList.add(list);
+                rowList.add(Arrays.asList(
+                        new InlineKeyboardButton().setText(listMusic.get(i)).setCallbackData(listJsonMusic.get(i))));
             }
             index += 10;
-        } else if (text.equals("Предыдущие")) {
+        } else if (text.equals("\u27A1")) {
+            for (int i = index; i < index + 10; i++) {
+                rowList.add(Arrays.asList(
+                        new InlineKeyboardButton().setText(listMusic.get(i)).setCallbackData(listJsonMusic.get(i))));
+            }
+            index += 10;
+        } else if (text.equals("\u2B05")) {
             for (int i = index - 20; i < index - 10; i++) {
-                List<InlineKeyboardButton> list = new ArrayList<>();
-                list.add(new InlineKeyboardButton().setText(listMusic.get(i)).setCallbackData(listJsonMusic.get(i)));
-                rowList.add(list);
+                rowList.add(Arrays.asList(
+                        new InlineKeyboardButton().setText(listMusic.get(i)).setCallbackData(listJsonMusic.get(i))));
             }
             index -= 10;
         }
 
+        rowList.add(Arrays.asList(
+                new InlineKeyboardButton().setText("\u2B05").setCallbackData("\u2B05"),
+                new InlineKeyboardButton().setText("\u27A1").setCallbackData("\u27A1")
+        ));
 
-        List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
-
-        keyboardButtonsRow.add(new InlineKeyboardButton().setText("Предыдущие").setCallbackData("Предыдущие"));
-        keyboardButtonsRow.add(new InlineKeyboardButton().setText("Следующие").setCallbackData("Следующие"));
-
-
-        rowList.add(keyboardButtonsRow);
-
-        inlineKeyboardMarkup.setKeyboard(rowList);
-
-        return new SendMessage()
-                .enableMarkdown(true)
-                .setChatId(chatId)
-                .setText(text)
-                .setReplyMarkup(inlineKeyboardMarkup);
+        return inlineKeyboardMarkup.setKeyboard(rowList);
     }
 
+    public synchronized void setButtons(SendMessage sendMessage) {
+
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+
+        KeyboardRow keyboardFirstRow = new KeyboardRow();
+
+        keyboardFirstRow.add(new KeyboardButton("Weather"));
+        keyboardFirstRow.add(new KeyboardButton("Movies"));
+        keyboardFirstRow.add(new KeyboardButton("Music"));
+
+        keyboard.add(keyboardFirstRow);
+
+        replyKeyboardMarkup.setKeyboard(keyboard);
+    }
 
     @Override
     public String getBotUsername() {
-        return "@DATT_Bot";
+        return botUserName;
     }
 
     @Override
     public String getBotToken() {
-        return "899355466:AAHzvUzhXMIdb87WmVkLy1rJioFhmaBS_Ws";
+        return token;
     }
 }
