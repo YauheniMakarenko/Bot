@@ -16,7 +16,7 @@ public class CommandMusic implements ICommand {
                     .setChatId(message.getChatId())
                     .setText("Популярные треки на zaycev.net \n" +
                             "Выберите трек который хотите прослушать")
-                    .setReplyMarkup( bot.sendInlineKeyBoardMessage("")));
+                    .setReplyMarkup( bot.sendInlineKeyBoardMessage(0, 10)));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

@@ -56,7 +56,7 @@ public class Bot extends TelegramLongPollingBot implements IBot {
         }
     }
 
-    public void workWithMessages(Update update){
+    public void workWithMessages(Update update) {
         Message message = update.getMessage();
         long chatId = update.getMessage().getChatId();
 
@@ -81,7 +81,7 @@ public class Bot extends TelegramLongPollingBot implements IBot {
         }
     }
 
-    public void workWithCallbackQuery(Update update){
+    public void workWithCallbackQuery(Update update) {
         String text = update.getCallbackQuery().getData();
         long chat_id = update.getCallbackQuery().getMessage().getChatId();
         if (text.equals("\u27A1")) {
@@ -89,7 +89,7 @@ public class Bot extends TelegramLongPollingBot implements IBot {
                 execute(new EditMessageReplyMarkup()
                         .setMessageId(update.getCallbackQuery().getMessage().getMessageId())
                         .setChatId(chat_id)
-                        .setReplyMarkup(sendInlineKeyBoardMessage(text)));
+                        .setReplyMarkup(sendInlineKeyBoardMessage(index + 10, index + 20)));
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -98,7 +98,7 @@ public class Bot extends TelegramLongPollingBot implements IBot {
                 execute(new EditMessageReplyMarkup()
                         .setMessageId(update.getCallbackQuery().getMessage().getMessageId())
                         .setChatId(chat_id)
-                        .setReplyMarkup(sendInlineKeyBoardMessage(text)));
+                        .setReplyMarkup(sendInlineKeyBoardMessage(index - 10, index)));
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -154,38 +154,34 @@ public class Bot extends TelegramLongPollingBot implements IBot {
         return info;
     }
 
-    public synchronized InlineKeyboardMarkup sendInlineKeyBoardMessage(String text) {
+    public synchronized InlineKeyboardMarkup sendInlineKeyBoardMessage(int index, int bound) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
         List<String> listMusic = music.getMusic();
         List<String> listJsonMusic = music.getJSONAudio();
 
-        if (!text.equals("\u27A1") && !text.equals("\u2B05")) {
-            for (int i = 0; i < 10; i++) {
-                rowList.add(Arrays.asList(
-                        new InlineKeyboardButton().setText(listMusic.get(i)).setCallbackData(listJsonMusic.get(i))));
-            }
-            index += 10;
-        } else if (text.equals("\u27A1")) {
-            for (int i = index; i < index + 10; i++) {
-                rowList.add(Arrays.asList(
-                        new InlineKeyboardButton().setText(listMusic.get(i)).setCallbackData(listJsonMusic.get(i))));
-            }
-            index += 10;
-        } else if (text.equals("\u2B05")) {
-            for (int i = index - 20; i < index - 10; i++) {
-                rowList.add(Arrays.asList(
-                        new InlineKeyboardButton().setText(listMusic.get(i)).setCallbackData(listJsonMusic.get(i))));
-            }
-            index -= 10;
+        if (index == listJsonMusic.size() && index == listMusic.size()) {
+            index = 0;
+            bound = 10;
+        }
+
+        if (index < 0) {
+            index = 50;
+            bound = 60;
+        }
+
+        this.index = index;
+        for (; index < bound; index++) {
+            rowList.add(Arrays.asList(
+                    new InlineKeyboardButton().setText(listMusic.get(index)).setCallbackData(listJsonMusic.get(index))));
         }
 
         rowList.add(Arrays.asList(
                 new InlineKeyboardButton().setText("\u2B05").setCallbackData("\u2B05"),
                 new InlineKeyboardButton().setText("\u27A1").setCallbackData("\u27A1")
         ));
-
+        
         return inlineKeyboardMarkup.setKeyboard(rowList);
     }
 
