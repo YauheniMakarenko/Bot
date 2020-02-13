@@ -1,7 +1,7 @@
 package com.Bot.Commands;
 
-import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.Update;
 
 public interface ICommand {
-    void action(Message message);
+    void action(Update update);
 }

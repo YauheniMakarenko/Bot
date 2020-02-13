@@ -1,13 +1,13 @@
 package com.Bot.Commands;
 
 import com.Bot.Bot;
-import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.Update;
 
 public class CommandMovies implements ICommand {
-    Bot bot = Bot.getBot();
+    private Bot bot = Bot.getBot();
 
     @Override
-    public void action(Message message) {
-        bot.sendMsg(message.getChatId(), bot.getInfoMovies());
+    public void action(Update update) {
+        bot.sendMsg(update.getMessage().getChatId(), bot.getInfoMovies());
     }
 }

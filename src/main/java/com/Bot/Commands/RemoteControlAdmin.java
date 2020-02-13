@@ -5,9 +5,13 @@ import java.util.Arrays;
 public enum RemoteControlAdmin {
 
     MUSIC("Music", new CommandMusic()),
+    TOP_MUSIC("TopMusic", new CommandMusicTop()),
+    SEARCH_MUSIC("SearchMusic", new CommandSearchMusic()),
     MOVIES("Movies", new CommandMovies()),
     WEATHER("Weather", new CommandWeather()),
-    START("/start", new CommandStart());
+    START("/start", new CommandStart()),
+    NEXT("\u27A1", new CommandNextPage()),
+    PREVIOUS("\u2B05", new CommandPreviousPage());
 
     private String code;
     private ICommand command;

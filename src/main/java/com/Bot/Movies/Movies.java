@@ -11,8 +11,8 @@ import java.util.List;
 
 public class Movies {
 
-    private  Document document;
-    private static List<String> listUrl = new ArrayList<>();
+    private Document document;
+    private List<String> listUrl;
     private Poster poster;
 
     public Movies() {
@@ -27,15 +27,15 @@ public class Movies {
         }
     }
 
-    public String getMovie(Message message){
+    public String getMovie(Message message) {
         String messageText = message.getText();
         String url = "";
         for (int i = 0; i < listUrl.size(); i++) {
-            if (messageText.equals(Integer.toString(i))){
+            if (messageText.equals(Integer.toString(i))) {
                 url = listUrl.get(i);
             }
         }
-        if (url.equals("")){
+        if (url.equals("")) {
             return "Ошибка ввода";
         }
         poster = new Poster(url);
@@ -47,6 +47,7 @@ public class Movies {
 
     public List<String> getEvent() {
         List<String> listInfoMovies = new ArrayList<>();
+        listUrl = new ArrayList<>();
         Element elementEventsBlock = document.getElementById("events-block");
         final int IGNORE_BLOCK = 1;
         for (int i = 0; i < elementEventsBlock.children().size(); i++) {
@@ -54,15 +55,19 @@ public class Movies {
             if (i == IGNORE_BLOCK) {
                 continue;
             }
-            for (int j = 0; j < element.children().size(); j++) {
-                String text = element.child(j).getElementsByClass("name").text();
-                String genres = element.child(j).getElementsByClass("txt").text();
-                genres = genres.replaceAll("Купить билет", "");
-
-                listInfoMovies.add(text + ". Жанры: " + genres);
-                listUrl.add(element.child(j).getElementsByClass("name").attr("href"));
-            }
+            addToList(element, listInfoMovies);
         }
         return listInfoMovies;
+    }
+
+    private void addToList(Element element, List<String> listInfoMovies) {
+        for (int j = 0; j < element.children().size(); j++) {
+            String text = element.child(j).getElementsByClass("name").text();
+            String genres = element.child(j).getElementsByClass("txt").text();
+            genres = genres.replaceAll("Купить билет", "");
+
+            listInfoMovies.add(text + ". Жанры: " + genres);
+            listUrl.add(element.child(j).getElementsByClass("name").attr("href"));
+        }
     }
 }
