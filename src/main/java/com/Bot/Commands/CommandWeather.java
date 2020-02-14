@@ -14,9 +14,11 @@ public class CommandWeather implements ICommand {
     @Override
     public void action(Update update) {
 
+        String givenString = update.getMessage().getText();
+        givenString = givenString.replaceAll("Weather ", "");
+
         try {
-            bot.sendMsg(update.getMessage().getChatId(),
-                    weather.getWeather(update.getMessage().getText().replaceAll("Weather ", "")));
+            bot.sendMsg(update.getMessage().getChatId(), weather.getWeather(givenString));
         } catch (IOException e) {
             bot.sendMsg(update.getMessage().getChatId(), "Город не найден!");
         }
