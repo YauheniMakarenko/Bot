@@ -30,6 +30,9 @@ public class Movies {
     public String getMovie(Message message) {
         String messageText = message.getText();
         String url = "";
+        if (listUrl == null){
+            return "Ошибка ввода";
+        }
         for (int i = 0; i < listUrl.size(); i++) {
             if (messageText.equals(Integer.toString(i))) {
                 url = listUrl.get(i);

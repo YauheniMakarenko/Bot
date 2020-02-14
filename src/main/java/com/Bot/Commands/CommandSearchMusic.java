@@ -15,9 +15,12 @@ public class CommandSearchMusic implements ICommand {
         if (update.getCallbackQuery() != null) {
             bot.sendMsg(update.getCallbackQuery().getMessage().getChatId(), "Введите музыку например: Music нурминский - купить бы джип");
         }else {
-            searchMusic = new SearchMusic(update.getMessage().getText().replaceAll("Music ", ""));
-            String s = searchMusic.getAudio();
-            bot.sendAudioMessage(update.getMessage().getChatId(), s);
+            String givenString = update.getMessage().getText();
+            givenString = givenString.replaceAll("Music ", "");
+
+            searchMusic = new SearchMusic(givenString);
+            String jsonUrl = searchMusic.getAudio();
+            bot.sendAudioMessage(update.getMessage().getChatId(), jsonUrl);
         }
 
     }

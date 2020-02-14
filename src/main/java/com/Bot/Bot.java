@@ -2,25 +2,14 @@ package com.Bot;
 
 import com.Bot.Commands.RemoteControlAdmin;
 import com.Bot.Movies.Movies;
-import com.Bot.Music.Music;
-import com.Bot.Music.SearchMusic;
-import com.Bot.Weather.Weather;
 import org.telegram.telegrambots.api.methods.send.SendAudio;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
-import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 
 
@@ -30,8 +19,6 @@ public class Bot extends TelegramLongPollingBot implements IBot {
     private final String token = "899355466:AAHzvUzhXMIdb87WmVkLy1rJioFhmaBS_Ws";
 
     private Regex regex = new Regex();
-    private Weather weather = new Weather();
-    private SearchMusic searchMusic;
     private Movies movies = new Movies();
     private Keyboard keyboard = Keyboard.getInstance();
     private static Bot instance;
@@ -59,11 +46,11 @@ public class Bot extends TelegramLongPollingBot implements IBot {
         Message message = update.getMessage();
         long chatId = update.getMessage().getChatId();
 
-        if (regex.finder(message.getText(), "Weather [A-zА-Я]+")){
+        if (regex.finder(message.getText(), "Weather [A-zА-Я].+")){
 
             RemoteControlAdmin.findCommand("Weather").action(update);
 
-        } else if ( message.getText().equals("Music")
+        } else if (message.getText().equals("Music")
                 || message.getText().equals("/start")
                 || message.getText().equals("Movies")) {
 
