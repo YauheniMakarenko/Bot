@@ -9,21 +9,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Music {
-    private Document document;
+
 
     public Music() {
-        connect();
     }
 
-    private void connect() {
+    public Document connect(){
+        Document document = null;
         try {
             document = Jsoup.connect("https://zaycev.net").get();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return document;
     }
 
     public List<String> getMusic() {
+        Document document = connect();
         Elements elements = document.getElementsByClass("musicset-track-list__items");
         List<String> list = new ArrayList<>();
 
@@ -34,6 +36,7 @@ public class Music {
     }
 
     public List<String> getJSONAudio() {
+        Document document = connect();
         Elements elements = document.getElementsByClass("musicset-track-list__items");
         List<String> list = new ArrayList<>();
         for (int i = 0; i < elements.first().children().size(); i++) {

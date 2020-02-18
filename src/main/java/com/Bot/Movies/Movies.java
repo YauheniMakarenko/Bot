@@ -1,9 +1,12 @@
 package com.Bot.Movies;
 
+import com.Bot.Bot;
+import com.google.inject.internal.asm.$Attribute;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.Update;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,26 +14,27 @@ import java.util.List;
 
 public class Movies {
 
-    private Document document;
     private List<String> listUrl;
     private Poster poster;
 
     public Movies() {
-        connect();
     }
 
-    private void connect() {
+    private Document connect() {
+        Document document = null;
         try {
             document = Jsoup.connect("https://afisha.tut.by/film").get();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return document;
     }
 
     public String getMovie(Message message) {
+
         String messageText = message.getText();
         String url = "";
-        if (listUrl == null){
+        if (listUrl == null) {
             return "Ошибка ввода";
         }
         for (int i = 0; i < listUrl.size(); i++) {
@@ -41,14 +45,16 @@ public class Movies {
         if (url.equals("")) {
             return "Ошибка ввода";
         }
-        poster = new Poster(url);
-        String result = poster.getTitle() + "\n";
+        poster = new Poster();
+        String result = poster.getTitle(url) + "\n";
         result = result.replaceAll("трейлер, отзывы и расписание на AFISHA.TUT.BY", "").toUpperCase();
-        result += poster.getInfoMovie();
+        result += poster.getInfoMovie(url);
+
         return result;
     }
 
     public List<String> getEvent() {
+        Document document = connect();
         List<String> listInfoMovies = new ArrayList<>();
         listUrl = new ArrayList<>();
         Element elementEventsBlock = document.getElementById("events-block");
@@ -73,4 +79,5 @@ public class Movies {
             listUrl.add(element.child(j).getElementsByClass("name").attr("href"));
         }
     }
+
 }

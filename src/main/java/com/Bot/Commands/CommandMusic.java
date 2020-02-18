@@ -15,7 +15,7 @@ import java.util.List;
 
 public class CommandMusic implements ICommand {
 
-    private Bot bot = Bot.getBot();
+    private Bot bot = Bot.getInstance();
 
     @Override
     public void action(Update update) {

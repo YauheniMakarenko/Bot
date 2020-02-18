@@ -8,17 +8,16 @@ import java.io.IOException;
 
 public class SearchMusic {
 
-    private Document document;
+    public SearchMusic() {
+    }
 
-    public SearchMusic(String givenString) {
+    public String getAudio(String givenString) {
+        Document document = null;
         try {
             document = Jsoup.connect("https://zaycev.net/search.html?query_search=" + givenString).get();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public String getAudio() {
         String jsonUrl;
 
         Elements elements = document.getElementsByClass("musicset-track-list__items");
@@ -31,8 +30,7 @@ public class SearchMusic {
     }
 
     public static void main(String[] args) {
-        System.out.println(new SearchMusic("нурминский - джип").getAudio());
+        System.out.println(new SearchMusic().getAudio("нурминский - купить бы джип"));
     }
 
 }
-

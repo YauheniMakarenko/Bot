@@ -8,7 +8,7 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 public class CommandNextPage implements ICommand {
 
-    private Bot bot = Bot.getBot();
+    private Bot bot = Bot.getInstance();
     private Keyboard keyboard = Keyboard.getInstance();
 
     @Override

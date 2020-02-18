@@ -4,7 +4,7 @@ import com.Bot.Bot;
 import org.telegram.telegrambots.api.objects.Update;
 
 public class CommandStart implements ICommand {
-    private Bot bot = Bot.getBot();
+    private Bot bot = Bot.getInstance();
     @Override
     public void action(Update update) {
         bot.sendMsg(update.getMessage().getChatId(), "Привет, " + update.getMessage().getChat().getFirstName() + ". " +

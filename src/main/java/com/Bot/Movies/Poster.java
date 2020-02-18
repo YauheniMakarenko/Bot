@@ -5,20 +5,26 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.print.Doc;
 import java.io.IOException;
 
 public class Poster {
-    private Document document;
 
-    public Poster(String string) {
+    public Poster() {
+    }
+
+    private Document connect(String givenString){
+        Document document = null;
         try {
-            document = Jsoup.connect(string).get();
+            document = Jsoup.connect(givenString).get();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return document;
     }
 
-    public String getInfoMovie() {
+    public String getInfoMovie(String urlConnect) {
+        Document document = connect(urlConnect);
         Element elementBlock = document.getElementById("schedule-table");
         String result = "";
         final int FIRST_BLOCK = 0;
@@ -36,7 +42,8 @@ public class Poster {
         return result;
     }
 
-    public String getTitle() {
+    public String getTitle(String urlConnect) {
+        Document document = connect(urlConnect);
         return document.title();
     }
 }

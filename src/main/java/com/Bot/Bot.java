@@ -10,6 +10,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -22,11 +23,13 @@ public class Bot extends TelegramLongPollingBot implements IBot {
     private Movies movies = new Movies();
     private Keyboard keyboard = Keyboard.getInstance();
     private static Bot instance;
+    private HashMap<Long, String> map = new HashMap<>();
+
 
     private Bot() {
     }
 
-    public static Bot getBot() {
+    public static Bot getInstance() {
         if (instance == null) {
             instance = new Bot();
         }
@@ -37,6 +40,7 @@ public class Bot extends TelegramLongPollingBot implements IBot {
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             workWithMessages(update);
+            map.put(update.getMessage().getChatId(), update.getMessage().getText());
         } else if (update.hasCallbackQuery()) {
             workWithCallbackQuery(update);
         }
@@ -46,7 +50,7 @@ public class Bot extends TelegramLongPollingBot implements IBot {
         Message message = update.getMessage();
         long chatId = update.getMessage().getChatId();
 
-        if (regex.finder(message.getText(), "Weather [A-zА-Я].+")){
+        if (regex.finder(message.getText(), "Weather [A-zА-Я].+")) {
 
             RemoteControlAdmin.findCommand("Weather").action(update);
 
@@ -57,9 +61,17 @@ public class Bot extends TelegramLongPollingBot implements IBot {
             RemoteControlAdmin.findCommand(message.getText()).action(update);
         } else {
             if (regex.finder(message.getText(), "\\d+")) {
-                sendMsg(chatId, movies.getMovie(message));
-            }
-             else if (regex.finder(message.getText(), "Music .+")) {
+
+                String value = map.get(chatId);
+                if (value != null) {
+                    if (value.equals("Movies") && !(map.isEmpty())) {
+                        sendMsg(chatId, movies.getMovie(message));
+                    }
+                }else{
+                    sendMsg(chatId, "Введите кнопку Movies");
+                }
+
+            } else if (regex.finder(message.getText(), ".+")) {
                 RemoteControlAdmin.findCommand("SearchMusic").action(update);
             }
         }
@@ -67,12 +79,12 @@ public class Bot extends TelegramLongPollingBot implements IBot {
 
     public void workWithCallbackQuery(Update update) {
         String text = update.getCallbackQuery().getData();
-        long chat_id = update.getCallbackQuery().getMessage().getChatId();
+        long chatId = update.getCallbackQuery().getMessage().getChatId();
         if (text.equals("\u27A1") || text.equals("\u2B05")
                 || text.equals("TopMusic") || text.equals("SearchMusic")) {
             RemoteControlAdmin.findCommand(text).action(update);
         } else {
-            sendAudioMessage(chat_id, text);
+            sendAudioMessage(chatId, text);
         }
     }
 
@@ -127,4 +139,3 @@ public class Bot extends TelegramLongPollingBot implements IBot {
         return token;
     }
 }
-
